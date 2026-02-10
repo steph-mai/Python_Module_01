@@ -12,17 +12,17 @@ class Plant:
         """Give a plant ability to grow."""
         self.height += size
         self.final_growth += size
-            
+
     def get_type(self) -> str:
         """Define the plant type"""
         return "regular"
-    
+
     def display_info(self) -> None:
         """Display plant data."""
         print(f"- {self.name}: "
               f"{self.height}cm,")
 
-    
+
 class FloweringPlant(Plant):
     """Create a specialized plant with floral characteristics."""
 
@@ -30,11 +30,11 @@ class FloweringPlant(Plant):
         """Initialize a flowering plant with an additionnal color attribute."""
         super().__init__(name, height, age)
         self.color = color
- 
+
     def get_type(self) -> str:
         """Define the plant type"""
         return "flowering"
-    
+
     def display_info(self) -> None:
         """Display flowering plant data."""
         print(f"- {self.name}: "
@@ -43,9 +43,10 @@ class FloweringPlant(Plant):
 
 
 class PrizeFlower(FloweringPlant):
-    """Create a specialized type of flowering plant eligible for competition prizes."""
+    """Create a type of flowering plant eligible for competition prizes."""
 
-    def __init__(self, name: str, height: int, age: int, color: str, prize: int) -> None:
+    def __init__(self, name: str, height: int,
+                 age: int, color: str, prize: int) -> None:
         """Initialize prize-winning flower with its competition score."""
         super().__init__(name, height, age, color)
         self.prize = prize
@@ -53,11 +54,11 @@ class PrizeFlower(FloweringPlant):
     def win_prize(self) -> None:
         """Display the competition prize points earned by the flower."""
         print(f"Prize points: {self.prize}")
-    
+
     def get_type(self) -> str:
         """Define the plant type"""
         return "prize"
-    
+
     def display_info(self) -> None:
         """Display prize flowering plant data."""
         print(f"- {self.name}: "
@@ -74,7 +75,19 @@ class GardenManager:
         self.garden_name = garden_name
         self.plants = []
         self.stats_helper = self.GardenStats()
-    
+
+    def add_plant(self, plant: Plant) -> None:
+        """Add a plant without using the append method."""
+        self.plants = self.plants + [plant]
+        print(f"Added {plant.name} to {self.garden_name}'s garden")
+
+    def help_all_grow(self, size: int) -> None:
+        """Make everyone grow and announce it."""
+        print(f"{self.garden_name} is helping all plants grow...")
+        for p in self.plants:
+            p.grow(size)
+            print(f"{p.name} grew {size}cm")
+
     class GardenStats:
         """Nested class helper to calculate analytics."""
 
@@ -82,7 +95,7 @@ class GardenManager:
             """Display analytics report."""
 
             print(f"=== {garden_name}'s Garden Report ===")
-            print("Plants in garden")
+            print("Plants in garden:")
             for p in plants:
                 p.display_info()
 
@@ -96,15 +109,36 @@ class GardenManager:
                 if ptype in counts:
                     counts[ptype] += 1
                 total_growth += p.final_growth
-            
+
             print(f"Plants added: {total_plants}, "
-                  f"Total growth: {total_growth}")
+                  f"Total growth: {total_growth}cm")
             print(f"Plant types: {counts['regular']} regular, "
                   f"{counts['flowering']} flowering, "
                   f"{counts['prize']} prize flowers")
-        
+
     def show_analytics(self) -> None:
         self.stats_helper.display_report(self.garden_name, self.plants)
+
+    @staticmethod
+    def factory_data(data: tuple) -> Plant:
+        plant_class = data[0]
+        args = data[1:]
+        return plant_class(*args)
+
+    @staticmethod
+    def height_validation_test(height: int) -> bool:
+        """Validate plant's height."""
+        return height > 0
+
+    @staticmethod
+    def calculate_scores(plants: list):
+        """Calculate a garden score, by summing height, age and prize."""
+        score = 0
+        for p in plants:
+            score += p.height + p.age
+            if p.get_type() == "prize":
+                score += p.prize
+        return score
 
     @classmethod
     def create_garden_network(cls, names: list) -> list:
@@ -112,17 +146,46 @@ class GardenManager:
         gardens_number = 0
         for name in names:
             gardens_number += 1
-        print(f"Total gardens managed: {gardens_number}")
         return [cls(name) for name in names]
 
-    @staticmethod
-    def height_validation_test(height: int) -> bool:
-        return height > 0
-    
-    @staticmethod
+    @classmethod
+    def run_full_demo(cls, garden_name: str) -> None:
+        """Orchestrate the entire scenario."""
 
-            
-                  
-            
-            
+        gardens = cls.create_garden_network([garden_name, "Bob"])
+        alice_garden = gardens[0]
+        bob_garden = gardens[1]
+        bob_garden.plants = [cls.factory_data(
+            (FloweringPlant, "Peony", 60, 32, "pink")
+            )]
+        print("=== Garden Management System Demo ===")
+        print()
+        alice_garden.add_plant(cls.factory_data(
+            (Plant, "Oak Tree", 100, 10)
+            ))
+        alice_garden.add_plant(cls.factory_data(
+            (FloweringPlant, "Rose", 25, 10, "red")
+            ))
+        alice_garden.add_plant(cls.factory_data(
+            (PrizeFlower, "Sunflower", 50, 10, "yellow", 10)
+            ))
 
+        print()
+        alice_garden.help_all_grow(1)
+        print()
+        alice_garden.show_analytics()
+        print()
+        is_valid = cls.height_validation_test(alice_garden.plants[0].height)
+        print(f"Height validation test: {is_valid}")
+
+        score_alice = cls.calculate_scores(alice_garden.plants)
+        score_bob = cls.calculate_scores(bob_garden.plants)
+        print(f"Garden scores - Alice: {score_alice}, Bob: {score_bob}")
+        gardens_count = 0
+        for g in gardens:
+            gardens_count += 1
+        print(f"Total gardens managed: {gardens_count}")
+
+
+if __name__ == "__main__":
+    GardenManager.run_full_demo("Alice")
