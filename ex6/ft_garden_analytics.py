@@ -77,7 +77,7 @@ class GardenManager:
         self.stats_helper = self.GardenStats()
 
     def add_plant(self, plant: Plant) -> None:
-        """Add a plant without using the append method."""
+        """Add a plant in the manager's garden."""
         self.plants = self.plants + [plant]
         print(f"Added {plant.name} to {self.garden_name}'s garden")
 
@@ -117,10 +117,17 @@ class GardenManager:
                   f"{counts['prize']} prize flowers")
 
     def show_analytics(self) -> None:
+        """Delegate the report display to the GardenStats helper."""
         self.stats_helper.display_report(self.garden_name, self.plants)
 
     @staticmethod
     def factory_data(data: tuple) -> Plant:
+        """Create a Plant instance from a tuple of data.
+
+        The tuple must contain the class as the first element,
+        followed by the arguments required for instantiation.
+
+        """
         plant_class = data[0]
         args = data[1:]
         return plant_class(*args)
@@ -142,7 +149,7 @@ class GardenManager:
 
     @classmethod
     def create_garden_network(cls, names: list) -> list:
-        """Initialize a list of manager and dsplay the gardens number"""
+        """Initialize a list of managers and display the gardens number"""
         gardens_number = 0
         for name in names:
             gardens_number += 1
@@ -155,6 +162,7 @@ class GardenManager:
         gardens = cls.create_garden_network([garden_name, "Bob"])
         alice_garden = gardens[0]
         bob_garden = gardens[1]
+
         bob_garden.plants = [cls.factory_data(
             (FloweringPlant, "Peony", 60, 32, "pink")
             )]
@@ -169,15 +177,14 @@ class GardenManager:
         alice_garden.add_plant(cls.factory_data(
             (PrizeFlower, "Sunflower", 50, 10, "yellow", 10)
             ))
-
         print()
+
         alice_garden.help_all_grow(1)
         print()
         alice_garden.show_analytics()
         print()
         is_valid = cls.height_validation_test(alice_garden.plants[0].height)
         print(f"Height validation test: {is_valid}")
-
         score_alice = cls.calculate_scores(alice_garden.plants)
         score_bob = cls.calculate_scores(bob_garden.plants)
         print(f"Garden scores - Alice: {score_alice}, Bob: {score_bob}")
