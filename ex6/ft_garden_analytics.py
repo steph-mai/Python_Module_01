@@ -98,6 +98,7 @@ class GardenManager:
             print("Plants in garden:")
             for p in plants:
                 p.display_info()
+            print()
 
             total_plants = 0
             total_growth = 0
